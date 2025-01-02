@@ -70,14 +70,14 @@ const Footer = () => {
             <Link href="/features" color="inherit" display="block" sx={{ mb: 1 }}>
               Tính Năng
             </Link>
-            <Link href="/pricing" color="inherit" display="block" sx={{ mb: 1 }}>
-              Bảng Giá
-            </Link>
             <Link href="/support" color="inherit" display="block" sx={{ mb: 1 }}>
               Hỗ Trợ
             </Link>
             <Link href="/privacy" color="inherit" display="block" sx={{ mb: 1 }}>
               Chính Sách Bảo Mật
+            </Link>
+            <Link href="/terms" color="inherit" display="block" sx={{ mb: 1 }}>
+              Điều Khoản Sử Dụng
             </Link>
           </Grid>
 
@@ -89,13 +89,13 @@ const Footer = () => {
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
               <LocationOn sx={{ mr: 1 }} />
               <Typography variant="body2">
-                123 Đường ABC, Quận 1, TP.HCM
+                Nhà số 23, Lô TT-01, Khu đô thị MonCity, P. Hàm Nghi, Hanoi
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
               <Phone sx={{ mr: 1 }} />
               <Typography variant="body2">
-                1900 1234
+                083 997 3636
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
