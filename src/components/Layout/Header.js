@@ -23,7 +23,7 @@ const Header = () => {
           Ví Điện Tử Tài Xỉu
         </Typography>
         <Button color="inherit" onClick={() => navigate('/dashboard')}>
-          Tổng Quan
+          Trang chủ
         </Button>
         <Button color="inherit" onClick={() => navigate('/wallets')}>
           Quản Lý Ví
