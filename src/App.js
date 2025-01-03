@@ -9,8 +9,13 @@ import Footer from './components/Layout/Footer';
 import Dashboard from './pages/Dashboard';
 import Transactions from './pages/Transactions';
 import Wallets from './pages/Wallets';
-import Category from "./pages/Category";
+import Category from './pages/Category';
 import Expense from './pages/Expense';
+import About from './pages/About';
+import Features from './pages/Features';
+import Support from './pages/Support';
+import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
 
 const theme = createTheme({
   palette: {
@@ -44,6 +49,11 @@ function App() {
                 <Route path="/wallets" element={<Wallets />} />
                 <Route path="/category" element={<Category />} />
                 <Route path="/expense" element={<Expense />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/features" element={<Features />} />
+                <Route path="/support" element={<Support />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/terms" element={<Terms />} />
               </Routes>
             </Box>
             <Footer />
