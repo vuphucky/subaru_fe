@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import {
   Container,
   Grid,
@@ -13,11 +14,11 @@ import {
   TextField,
   IconButton,
   Box,
-  MenuItem,
-  Select,
-  InputLabel,
   FormControl,
-} from "@mui/material";
+  InputLabel,
+  Select,
+  MenuItem
+} from '@mui/material';
 import {
   Add as AddIcon,
   Edit as EditIcon,
@@ -34,7 +35,13 @@ const Wallets = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [openAddMoneyDialog, setOpenAddMoneyDialog] = useState(false);
   const [editingWallet, setEditingWallet] = useState(null);
-  const [newWallet, setNewWallet] = useState({ name: "", balance: "", type: "cash", icon: "AccountBalanceWallet" });
+  const [newWallet, setNewWallet] = useState({ 
+    name: "", 
+    balance: "", 
+    icon: "AccountBalanceWallet",
+    currency: "VND",
+    description: ""
+  });
   const [addMoneyData, setAddMoneyData] = useState({
     amount: "",
     note: "",
@@ -55,12 +62,19 @@ const Wallets = () => {
       setNewWallet({
         name: wallet.name,
         balance: wallet.balance.toString(),
-        icon: wallet.icon,
-        type: wallet.type
+        icon: wallet.iconUrl || "AccountBalanceWallet",
+        currency: wallet.currency || "VND",
+        description: wallet.description || ""
       });
     } else {
       setEditingWallet(null);
-      setNewWallet({ name: "", balance: "", type: "cash", icon: "AccountBalanceWallet" });
+      setNewWallet({ 
+        name: "", 
+        balance: "", 
+        icon: "AccountBalanceWallet",
+        currency: "VND",
+        description: ""
+      });
     }
     setOpenDialog(true);
   };
@@ -68,45 +82,83 @@ const Wallets = () => {
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setEditingWallet(null);
-    setNewWallet({ name: "", balance: "", type: "cash", icon: "AccountBalanceWallet" });
+    setNewWallet({ 
+      name: "", 
+      balance: "", 
+      icon: "AccountBalanceWallet",
+      currency: "VND",
+      description: ""
+    });
   };
 
   const handleSaveWallet = async () => {
     try {
-      if (editingWallet) {
-        console.log('Updating wallet with data:', {
-          id: editingWallet.id,
-          name: newWallet.name,
-          balance: parseFloat(newWallet.balance),
-          icon: newWallet.icon,
-          type: editingWallet.type
-        });
+      // Kiểm tra dữ liệu đầu vào
+      if (!newWallet.name.trim()) {
+        alert('Vui lòng nhập tên ví!');
+        return;
+      }
 
-        // Gọi API cập nhật ví với dữ liệu đã được xử lý
+      if (editingWallet) {
+        // Cập nhật ví
         const response = await axios.post('http://localhost:8080/api/wallets/fix', {
           id: editingWallet.id,
           name: newWallet.name,
-          balance: parseFloat(newWallet.balance),
-          icon: newWallet.icon,
-          type: editingWallet.type
+          balance: parseFloat(newWallet.balance) || 0,
+          iconUrl: newWallet.icon,
+          currency: newWallet.currency,
+          description: newWallet.description || `Ví ${newWallet.name}`
+        }, {
+          headers: {
+            'Authorization': `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJEdXliZmwiLCJpYXQiOjE3MzYxMzg2OTAsImV4cCI6MTczNjIyNTA5MH0.vHpr93tdIYmKg2o_szYvAjLPISAQXQnaf0vTGjFhWV0`
+          }
         });
 
-        console.log('API Response:', response.data);
-
-        // Sau khi cập nhật thành công, tải lại danh sách ví
-        await fetchWallets();
+        console.log('Cập nhật ví thành công:', response.data);
       } else {
-        setWallets([...wallets, { ...newWallet, id: wallets.length + 1 }]);
+        // Thêm ví mới
+        const response = await axios.post('http://localhost:8080/api/wallets/add', {
+          name: newWallet.name,
+          balance: parseFloat(newWallet.balance) || 0,
+          iconUrl: newWallet.icon,
+          currency: newWallet.currency,
+          description: newWallet.description || `Ví ${newWallet.name}`
+        }, {
+          headers: {
+            'Authorization': `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJEdXliZmwiLCJpYXQiOjE3MzYxMzg2OTAsImV4cCI6MTczNjIyNTA5MH0.vHpr93tdIYmKg2o_szYvAjLPISAQXQnaf0vTGjFhWV0`
+          }
+        });
+
+        console.log('Thêm ví mới thành công:', response.data);
       }
+      
+      // Tải lại danh sách ví
+      await fetchWallets();
       handleCloseDialog();
+      alert(editingWallet ? 'Cập nhật ví thành công!' : 'Thêm ví mới thành công!');
     } catch (error) {
-      console.error('Error saving wallet:', error.response?.data || error.message);
-      alert('Có lỗi xảy ra khi cập nhật ví. Vui lòng thử lại!');
+      console.error('Lỗi khi thao tác với ví:', error.response?.data || error.message);
+      alert('Có lỗi xảy ra. Vui lòng thử lại!');
     }
   };
 
-  const handleDeleteWallet = (id) => {
-    setWallets(wallets.filter((w) => w.id !== id));
+  const handleDeleteWallet = async (id) => {
+    try {
+      const response = await axios.delete(`http://localhost:8080/api/wallets/${id}`, {
+        headers: {
+          'Authorization': `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJEdXliZmwiLCJpYXQiOjE3MzYxMzg2OTAsImV4cCI6MTczNjIyNTA5MH0.vHpr93tdIYmKg2o_szYvAjLPISAQXQnaf0vTGjFhWV0`
+        }
+      });
+      
+      if (response.status === 200) {
+        // Cập nhật state sau khi xóa thành công
+        setWallets(wallets.filter((w) => w.id !== id));
+        alert('Xóa ví thành công!');
+      }
+    } catch (error) {
+      console.error('Lỗi khi xóa ví:', error.response?.data || error.message);
+      alert('Có lỗi xảy ra khi xóa ví. Vui lòng thử lại!');
+    }
   };
 
   const handleOpenAddMoneyDialog = (walletId) => {
@@ -133,11 +185,16 @@ const Wallets = () => {
         walletId: addMoneyData.walletId,
         amount: parseFloat(addMoneyData.amount),
         note: addMoneyData.note
+      }, {
+        headers: {
+          'Authorization': `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJEdXliZmwiLCJpYXQiOjE3MzYxNDIyODgsImV4cCI6MTczNjIyODY4OH0.W9MMjR0r5meLVE_cp5dX-F5lL6S9Ga7ZW_06JEpBs3U`
+        }
       });
 
       console.log('Add money response:', response.data);
       await fetchWallets();
       handleCloseAddMoneyDialog();
+      alert('Thêm tiền thành công!');
     } catch (error) {
       console.error('Error adding money:', error.response?.data || error.message);
       alert('Có lỗi xảy ra khi thêm tiền. Vui lòng thử lại!');
@@ -146,10 +203,14 @@ const Wallets = () => {
 
   const fetchWallets = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/api/wallets/list");
+      const response = await axios.get('http://localhost:8080/api/wallets/list', {
+        headers: {
+          'Authorization': `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJEdXliZmwiLCJpYXQiOjE3MzYxMzg2OTAsImV4cCI6MTczNjIyNTA5MH0.vHpr93tdIYmKg2o_szYvAjLPISAQXQnaf0vTGjFhWV0`
+        }
+      });
       setWallets(response.data);
     } catch (error) {
-      console.error("Error fetching wallets:", error);
+      console.error('Error fetching wallets:', error);
     }
   };
 
@@ -212,7 +273,7 @@ const Wallets = () => {
                       mr: 2,
                     }}
                   >
-                    {icons.find((icon) => icon.value === wallet.icon)?.icon || <AccountBalanceWallet />}
+                    {icons.find((icon) => icon.value === wallet.iconUrl)?.icon || <AccountBalanceWallet />}
                   </Box>
                   <Typography variant="h6" component="div" sx={{ fontWeight: 'medium' }}>
                     {wallet.name}
@@ -332,6 +393,14 @@ const Wallets = () => {
               ))}
             </Select>
           </FormControl>
+          <TextField
+              margin="dense"
+              label="Mô Tả"
+              fullWidth
+              value={newWallet.description}
+              onChange={(e) => setNewWallet({ ...newWallet, description: e.target.value })}
+              sx={{ mb: 2 }}
+          />
         </DialogContent>
         <DialogActions sx={{ p: 3, pt: 2 }}>
           <Button
