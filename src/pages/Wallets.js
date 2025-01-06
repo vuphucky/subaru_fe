@@ -51,8 +51,8 @@ const Wallets = () => {
 
   const handleSaveWallet = () => {
     if (editingWallet) {
-      setWallets(wallets.map(w => 
-        w.id === editingWallet.id ? { ...newWallet, id: w.id } : w
+      setWallets(wallets.map(w =>
+          w.id === editingWallet.id ? { ...newWallet, id: w.id } : w
       ));
     } else {
       setWallets([...wallets, { ...newWallet, id: wallets.length + 1 }]);
@@ -65,93 +65,93 @@ const Wallets = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-        <Typography variant="h5" component="h2">
-          Quản Lý Ví
-        </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => handleOpenDialog()}
-        >
-          Thêm Ví Mới
-        </Button>
-      </Box>
-
-      <Grid container spacing={3}>
-        {wallets.map((wallet) => (
-          <Grid item xs={12} md={4} key={wallet.id}>
-            <Card>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <AccountBalanceWallet sx={{ mr: 1 }} />
-                  <Typography variant="h6" component="div">
-                    {wallet.name}
-                  </Typography>
-                </Box>
-                <Typography variant="h4" color="primary">
-                  {wallet.balance}
-                </Typography>
-                <Typography color="textSecondary" sx={{ mb: 1.5 }}>
-                  Loại: {wallet.type}
-                </Typography>
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-                  <IconButton
-                    color="primary"
-                    onClick={() => handleOpenDialog(wallet)}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                  <IconButton
-                    color="error"
-                    onClick={() => handleDeleteWallet(wallet.id)}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-
-      <Dialog open={openDialog} onClose={handleCloseDialog}>
-        <DialogTitle>
-          {editingWallet ? 'Chỉnh Sửa Ví' : 'Thêm Ví Mới'}
-        </DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Tên Ví"
-            fullWidth
-            value={newWallet.name}
-            onChange={(e) => setNewWallet({ ...newWallet, name: e.target.value })}
-          />
-          <TextField
-            margin="dense"
-            label="Số Dư"
-            fullWidth
-            value={newWallet.balance}
-            onChange={(e) => setNewWallet({ ...newWallet, balance: e.target.value })}
-          />
-          <TextField
-            margin="dense"
-            label="Loại Ví"
-            fullWidth
-            value={newWallet.type}
-            onChange={(e) => setNewWallet({ ...newWallet, type: e.target.value })}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Hủy</Button>
-          <Button onClick={handleSaveWallet} variant="contained">
-            {editingWallet ? 'Cập Nhật' : 'Thêm'}
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+          <Typography variant="h5" component="h2">
+            Quản Lý Ví
+          </Typography>
+          <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => handleOpenDialog()}
+          >
+            Thêm Ví Mới
           </Button>
-        </DialogActions>
-      </Dialog>
-    </Container>
+        </Box>
+
+        <Grid container spacing={3}>
+          {wallets.map((wallet) => (
+              <Grid item xs={12} md={4} key={wallet.id}>
+                <Card>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                      <AccountBalanceWallet sx={{ mr: 1 }} />
+                      <Typography variant="h6" component="div">
+                        {wallet.name}
+                      </Typography>
+                    </Box>
+                    <Typography variant="h4" color="primary">
+                      {wallet.balance}
+                    </Typography>
+                    <Typography color="textSecondary" sx={{ mb: 1.5 }}>
+                      Loại: {wallet.type}
+                    </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+                      <IconButton
+                          color="primary"
+                          onClick={() => handleOpenDialog(wallet)}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton
+                          color="error"
+                          onClick={() => handleDeleteWallet(wallet.id)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+          ))}
+        </Grid>
+
+        <Dialog open={openDialog} onClose={handleCloseDialog}>
+          <DialogTitle>
+            {editingWallet ? 'Chỉnh Sửa Ví' : 'Thêm Ví Mới'}
+          </DialogTitle>
+          <DialogContent>
+            <TextField
+                autoFocus
+                margin="dense"
+                label="Tên Ví"
+                fullWidth
+                value={newWallet.name}
+                onChange={(e) => setNewWallet({ ...newWallet, name: e.target.value })}
+            />
+            <TextField
+                margin="dense"
+                label="Số Dư"
+                fullWidth
+                value={newWallet.balance}
+                onChange={(e) => setNewWallet({ ...newWallet, balance: e.target.value })}
+            />
+            <TextField
+                margin="dense"
+                label="Loại Ví"
+                fullWidth
+                value={newWallet.type}
+                onChange={(e) => setNewWallet({ ...newWallet, type: e.target.value })}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseDialog}>Hủy</Button>
+            <Button onClick={handleSaveWallet} variant="contained">
+              {editingWallet ? 'Cập Nhật' : 'Thêm'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Container>
   );
 };
 

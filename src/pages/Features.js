@@ -66,79 +66,79 @@ const Features = () => {
   ];
 
   return (
-    <Container maxWidth="lg" sx={{ py: 8 }}>
-      {/* Header */}
-      <Box sx={{ mb: 6, textAlign: 'center' }}>
-        <Typography variant="h3" component="h1" gutterBottom>
-          Tính Năng Nổi Bật
-        </Typography>
-        <Typography variant="h6" color="text.secondary">
-          Khám phá những tính năng độc đáo giúp bạn quản lý tài chính hiệu quả
-        </Typography>
-      </Box>
+      <Container maxWidth="lg" sx={{ py: 8 }}>
+        {/* Header */}
+        <Box sx={{ mb: 6, textAlign: 'center' }}>
+          <Typography variant="h3" component="h1" gutterBottom>
+            Tính Năng Nổi Bật
+          </Typography>
+          <Typography variant="h6" color="text.secondary">
+            Khám phá những tính năng độc đáo giúp bạn quản lý tài chính hiệu quả
+          </Typography>
+        </Box>
 
-      {/* Kiểm Soát Chi Tiêu Thông Minh */}
-      <Paper elevation={3} sx={{ p: 4, mb: 6 }}>
-        <Typography variant="h4" gutterBottom sx={{ mb: 4 }}>
-          1. Kiểm Soát Chi Tiêu Thông Minh
-        </Typography>
-        <Grid container spacing={3}>
-          {smartSpendingFeatures.map((feature, index) => (
-            <Grid item xs={12} md={6} key={index}>
-              <Card elevation={2}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    {feature.icon}
-                    <Typography variant="h6" sx={{ ml: 2 }}>
-                      {feature.title}
-                    </Typography>
-                  </Box>
-                  <Typography variant="body1" color="text.secondary">
-                    {feature.description}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      </Paper>
+        {/* Kiểm Soát Chi Tiêu Thông Minh */}
+        <Paper elevation={3} sx={{ p: 4, mb: 6 }}>
+          <Typography variant="h4" gutterBottom sx={{ mb: 4 }}>
+            1. Kiểm Soát Chi Tiêu Thông Minh
+          </Typography>
+          <Grid container spacing={3}>
+            {smartSpendingFeatures.map((feature, index) => (
+                <Grid item xs={12} md={6} key={index}>
+                  <Card elevation={2}>
+                    <CardContent>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                        {feature.icon}
+                        <Typography variant="h6" sx={{ ml: 2 }}>
+                          {feature.title}
+                        </Typography>
+                      </Box>
+                      <Typography variant="body1" color="text.secondary">
+                        {feature.description}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+            ))}
+          </Grid>
+        </Paper>
 
-      {/* Quản Lý Nhiều Loại Ví */}
-      <Paper elevation={3} sx={{ p: 4 }}>
-        <Typography variant="h4" gutterBottom sx={{ mb: 4 }}>
-          2. Quản Lý Nhiều Loại Ví
-        </Typography>
-        <Grid container spacing={3}>
-          {walletManagementFeatures.map((feature, index) => (
-            <Grid item xs={12} md={4} key={index}>
-              <Card elevation={2}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    {feature.icon}
-                    <Typography variant="h6" sx={{ ml: 2 }}>
-                      {feature.title}
-                    </Typography>
-                  </Box>
-                  <Typography variant="body1" color="text.secondary">
-                    {feature.description}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      </Paper>
+        {/* Quản Lý Nhiều Loại Ví */}
+        <Paper elevation={3} sx={{ p: 4 }}>
+          <Typography variant="h4" gutterBottom sx={{ mb: 4 }}>
+            2. Quản Lý Nhiều Loại Ví
+          </Typography>
+          <Grid container spacing={3}>
+            {walletManagementFeatures.map((feature, index) => (
+                <Grid item xs={12} md={4} key={index}>
+                  <Card elevation={2}>
+                    <CardContent>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                        {feature.icon}
+                        <Typography variant="h6" sx={{ ml: 2 }}>
+                          {feature.title}
+                        </Typography>
+                      </Box>
+                      <Typography variant="body1" color="text.secondary">
+                        {feature.description}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+            ))}
+          </Grid>
+        </Paper>
 
-      {/* Call to Action */}
-      <Box sx={{ textAlign: 'center', mt: 6 }}>
-        <Typography variant="h5" gutterBottom>
-          Bắt đầu quản lý tài chính thông minh ngay hôm nay
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Tài Xỉu - Đồng hành cùng bạn trên mọi hành trình tài chính
-        </Typography>
-      </Box>
-    </Container>
+        {/* Call to Action */}
+        <Box sx={{ textAlign: 'center', mt: 6 }}>
+          <Typography variant="h5" gutterBottom>
+            Bắt đầu quản lý tài chính thông minh ngay hôm nay
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Tài Xỉu - Đồng hành cùng bạn trên mọi hành trình tài chính
+          </Typography>
+        </Box>
+      </Container>
   );
 };
 

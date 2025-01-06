@@ -94,52 +94,52 @@ const Terms = () => {
   ];
 
   return (
-    <Container maxWidth="lg" sx={{ py: 8 }}>
-      {/* Header */}
-      <Box sx={{ mb: 6, textAlign: 'center' }}>
-        <Typography variant="h3" component="h1" gutterBottom>
-          Điều Khoản Sử Dụng
-        </Typography>
-        <Gavel color="primary" sx={{ fontSize: 60, mb: 2 }} />
-      </Box>
+      <Container maxWidth="lg" sx={{ py: 8 }}>
+        {/* Header */}
+        <Box sx={{ mb: 6, textAlign: 'center' }}>
+          <Typography variant="h3" component="h1" gutterBottom>
+            Điều Khoản Sử Dụng
+          </Typography>
+          <Gavel color="primary" sx={{ fontSize: 60, mb: 2 }} />
+        </Box>
 
-      {/* Giới thiệu */}
-      <Paper elevation={3} sx={{ p: 4, mb: 6 }}>
-        <Typography variant="h5" gutterBottom>
-          Giới Thiệu
-        </Typography>
-        <Typography variant="body1" paragraph>
-          Chào mừng bạn đến với Tài xỉu. Bằng cách đăng ký và sử dụng dịch vụ của chúng tôi, 
-          bạn đồng ý tuân thủ các điều khoản sử dụng dưới đây. Chúng tôi khuyến khích bạn đọc kỹ 
-          để hiểu rõ quyền và nghĩa vụ của mình khi sử dụng dịch vụ.
-        </Typography>
-      </Paper>
-
-      {/* Các section */}
-      {sections.map((section, index) => (
-        <Paper key={index} elevation={3} sx={{ p: 4, mb: 4 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-            {section.icon}
-            <Typography variant="h5" sx={{ ml: 2 }}>
-              {section.title}
-            </Typography>
-          </Box>
-          {Array.isArray(section.content) ? (
-            <List>
-              {section.content.map((item, i) => (
-                <ListItem key={i}>
-                  <ListItemText primary={item} />
-                </ListItem>
-              ))}
-            </List>
-          ) : (
-            <Typography variant="body1">
-              {section.content}
-            </Typography>
-          )}
+        {/* Giới thiệu */}
+        <Paper elevation={3} sx={{ p: 4, mb: 6 }}>
+          <Typography variant="h5" gutterBottom>
+            Giới Thiệu
+          </Typography>
+          <Typography variant="body1" paragraph>
+            Chào mừng bạn đến với Tài xỉu. Bằng cách đăng ký và sử dụng dịch vụ của chúng tôi,
+            bạn đồng ý tuân thủ các điều khoản sử dụng dưới đây. Chúng tôi khuyến khích bạn đọc kỹ
+            để hiểu rõ quyền và nghĩa vụ của mình khi sử dụng dịch vụ.
+          </Typography>
         </Paper>
-      ))}
-    </Container>
+
+        {/* Các section */}
+        {sections.map((section, index) => (
+            <Paper key={index} elevation={3} sx={{ p: 4, mb: 4 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                {section.icon}
+                <Typography variant="h5" sx={{ ml: 2 }}>
+                  {section.title}
+                </Typography>
+              </Box>
+              {Array.isArray(section.content) ? (
+                  <List>
+                    {section.content.map((item, i) => (
+                        <ListItem key={i}>
+                          <ListItemText primary={item} />
+                        </ListItem>
+                    ))}
+                  </List>
+              ) : (
+                  <Typography variant="body1">
+                    {section.content}
+                  </Typography>
+              )}
+            </Paper>
+        ))}
+      </Container>
   );
 };
 
