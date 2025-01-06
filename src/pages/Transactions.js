@@ -40,53 +40,53 @@ const Transactions = () => {
   ];
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-        <Typography variant="h5" component="h2">
-          Lịch Sử Giao Dịch
-        </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          color="primary"
-        >
-          Thêm Giao Dịch
-        </Button>
-      </Box>
-      
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Ngày</TableCell>
-              <TableCell>Mô tả</TableCell>
-              <TableCell>Loại</TableCell>
-              <TableCell align="right">Số tiền</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {transactions.map((transaction) => (
-              <TableRow
-                key={transaction.id}
-                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-              >
-                <TableCell>{transaction.date}</TableCell>
-                <TableCell>{transaction.description}</TableCell>
-                <TableCell>{transaction.type}</TableCell>
-                <TableCell 
-                  align="right"
-                  sx={{ 
-                    color: transaction.type === 'Thu nhập' ? 'success.main' : 'error.main'
-                  }}
-                >
-                  {transaction.amount}
-                </TableCell>
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+          <Typography variant="h5" component="h2">
+            Lịch Sử Giao Dịch
+          </Typography>
+          <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              color="primary"
+          >
+            Thêm Giao Dịch
+          </Button>
+        </Box>
+
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Ngày</TableCell>
+                <TableCell>Mô tả</TableCell>
+                <TableCell>Loại</TableCell>
+                <TableCell align="right">Số tiền</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Container>
+            </TableHead>
+            <TableBody>
+              {transactions.map((transaction) => (
+                  <TableRow
+                      key={transaction.id}
+                      sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                  >
+                    <TableCell>{transaction.date}</TableCell>
+                    <TableCell>{transaction.description}</TableCell>
+                    <TableCell>{transaction.type}</TableCell>
+                    <TableCell
+                        align="right"
+                        sx={{
+                          color: transaction.type === 'Thu nhập' ? 'success.main' : 'error.main'
+                        }}
+                    >
+                      {transaction.amount}
+                    </TableCell>
+                  </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Container>
   );
 };
 

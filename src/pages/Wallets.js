@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState } from 'react';
 import {
   Container,
   Grid,
@@ -82,7 +81,7 @@ const Wallets = () => {
           icon: newWallet.icon,
           type: editingWallet.type
         });
-        
+
         // Gọi API cập nhật ví với dữ liệu đã được xử lý
         const response = await axios.post('http://localhost:8080/api/wallets/fix', {
           id: editingWallet.id,
@@ -91,9 +90,9 @@ const Wallets = () => {
           icon: newWallet.icon,
           type: editingWallet.type
         });
-        
+
         console.log('API Response:', response.data);
-        
+
         // Sau khi cập nhật thành công, tải lại danh sách ví
         await fetchWallets();
       } else {
@@ -135,7 +134,7 @@ const Wallets = () => {
         amount: parseFloat(addMoneyData.amount),
         note: addMoneyData.note
       });
-      
+
       console.log('Add money response:', response.data);
       await fetchWallets();
       handleCloseAddMoneyDialog();
@@ -180,8 +179,8 @@ const Wallets = () => {
       <Grid container spacing={3}>
         {wallets.map((wallet) => (
           <Grid item xs={12} md={4} key={wallet.id}>
-            <Card 
-              sx={{ 
+            <Card
+              sx={{
                 boxShadow: 3,
                 transition: 'transform 0.2s, box-shadow 0.2s',
                 '&:hover': {
@@ -241,18 +240,18 @@ const Wallets = () => {
                 </Box>
 
                 <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2, pt: 2, borderTop: 1, borderColor: 'divider' }}>
-                  <IconButton 
-                    color="primary" 
+                  <IconButton
+                    color="primary"
                     onClick={() => handleOpenDialog(wallet)}
-                    sx={{ 
+                    sx={{
                       mr: 1,
                       '&:hover': { backgroundColor: 'rgba(33, 150, 243, 0.1)' }
                     }}
                   >
                     <EditIcon />
                   </IconButton>
-                  <IconButton 
-                    color="error" 
+                  <IconButton
+                    color="error"
                     onClick={() => handleDeleteWallet(wallet.id)}
                     sx={{ '&:hover': { backgroundColor: 'rgba(211, 47, 47, 0.1)' } }}
                   >
@@ -274,8 +273,8 @@ const Wallets = () => {
         ))}
       </Grid>
 
-      <Dialog 
-        open={openDialog} 
+      <Dialog
+        open={openDialog}
         onClose={handleCloseDialog}
         PaperProps={{
           sx: {
@@ -284,7 +283,7 @@ const Wallets = () => {
           }
         }}
       >
-        <DialogTitle sx={{ 
+        <DialogTitle sx={{
           background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
           color: 'white',
           mb: 2
@@ -335,17 +334,17 @@ const Wallets = () => {
           </FormControl>
         </DialogContent>
         <DialogActions sx={{ p: 3, pt: 2 }}>
-          <Button 
+          <Button
             onClick={handleCloseDialog}
-            sx={{ 
+            sx={{
               color: 'text.secondary',
               '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
             }}
           >
             Hủy
           </Button>
-          <Button 
-            onClick={handleSaveWallet} 
+          <Button
+            onClick={handleSaveWallet}
             variant="contained"
             sx={{
               background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
