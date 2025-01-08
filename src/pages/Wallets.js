@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import {
   Container,
   Grid,
@@ -17,7 +16,9 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem
+  MenuItem,
+  CircularProgress,
+  Alert,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -29,12 +30,17 @@ import {
   CreditCard,
   LocalAtm,
 } from "@mui/icons-material";
+import walletService from '../services/walletService';
+import { useNavigate } from 'react-router-dom';
 
 const Wallets = () => {
+  const navigate = useNavigate();
   const [wallets, setWallets] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [openAddMoneyDialog, setOpenAddMoneyDialog] = useState(false);
   const [editingWallet, setEditingWallet] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [newWallet, setNewWallet] = useState({ 
     name: "", 
     balance: "", 
@@ -55,6 +61,82 @@ const Wallets = () => {
     { label: "Tiền Mặt", value: "LocalAtm", icon: <LocalAtm fontSize="large" /> },
     { label: "Quản Lý Tiền", value: "AttachMoney", icon: <AttachMoney fontSize="large" /> },
   ];
+
+  const fetchWallets = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await walletService.getWallets();
+      setWallets(data);
+    } catch (error) {
+      console.error('Lỗi khi lấy danh sách ví:', error);
+      if (error === 'Vui lòng đăng nhập lại') {
+        navigate('/login');
+      } else {
+        setError(error);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveWallet = async () => {
+    try {
+      if (!newWallet.name.trim()) {
+        throw new Error('Vui lòng nhập tên ví!');
+      }
+
+      const walletData = {
+        name: newWallet.name,
+        balance: parseFloat(newWallet.balance) || 0,
+        iconUrl: newWallet.icon,
+        currency: newWallet.currency,
+        description: newWallet.description || `Ví ${newWallet.name}`
+      };
+
+      if (editingWallet) {
+        walletData.id = editingWallet.id;
+        await walletService.updateWallet(walletData);
+      } else {
+        await walletService.addWallet(walletData);
+      }
+      
+      await fetchWallets();
+      handleCloseDialog();
+      alert(editingWallet ? 'Cập nhật ví thành công!' : 'Thêm ví mới thành công!');
+    } catch (error) {
+      console.error('Lỗi khi thao tác với ví:', error);
+      alert(error);
+    }
+  };
+
+  const handleDeleteWallet = async (id) => {
+    try {
+      await walletService.deleteWallet(id);
+      setWallets(wallets.filter((w) => w.id !== id));
+      alert('Xóa ví thành công!');
+    } catch (error) {
+      console.error('Lỗi khi xóa ví:', error);
+      alert(error);
+    }
+  };
+
+  const handleAddMoney = async () => {
+    try {
+      await walletService.addMoney({
+        walletId: addMoneyData.walletId,
+        amount: parseFloat(addMoneyData.amount),
+        note: addMoneyData.note
+      });
+
+      await fetchWallets();
+      handleCloseAddMoneyDialog();
+      alert('Thêm tiền thành công!');
+    } catch (error) {
+      console.error('Lỗi khi thêm tiền:', error);
+      alert(error);
+    }
+  };
 
   const handleOpenDialog = (wallet = null) => {
     if (wallet) {
@@ -91,76 +173,6 @@ const Wallets = () => {
     });
   };
 
-  const handleSaveWallet = async () => {
-    try {
-      // Kiểm tra dữ liệu đầu vào
-      if (!newWallet.name.trim()) {
-        alert('Vui lòng nhập tên ví!');
-        return;
-      }
-
-      if (editingWallet) {
-        // Cập nhật ví
-        const response = await axios.post('http://localhost:8080/api/wallets/fix', {
-          id: editingWallet.id,
-          name: newWallet.name,
-          balance: parseFloat(newWallet.balance) || 0,
-          iconUrl: newWallet.icon,
-          currency: newWallet.currency,
-          description: newWallet.description || `Ví ${newWallet.name}`
-        }, {
-          headers: {
-            'Authorization': `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJEdXliZmwiLCJpYXQiOjE3MzYxMzg2OTAsImV4cCI6MTczNjIyNTA5MH0.vHpr93tdIYmKg2o_szYvAjLPISAQXQnaf0vTGjFhWV0`
-          }
-        });
-
-        console.log('Cập nhật ví thành công:', response.data);
-      } else {
-        // Thêm ví mới
-        const response = await axios.post('http://localhost:8080/api/wallets/add', {
-          name: newWallet.name,
-          balance: parseFloat(newWallet.balance) || 0,
-          iconUrl: newWallet.icon,
-          currency: newWallet.currency,
-          description: newWallet.description || `Ví ${newWallet.name}`
-        }, {
-          headers: {
-            'Authorization': `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJEdXliZmwiLCJpYXQiOjE3MzYxMzg2OTAsImV4cCI6MTczNjIyNTA5MH0.vHpr93tdIYmKg2o_szYvAjLPISAQXQnaf0vTGjFhWV0`
-          }
-        });
-
-        console.log('Thêm ví mới thành công:', response.data);
-      }
-      
-      // Tải lại danh sách ví
-      await fetchWallets();
-      handleCloseDialog();
-      alert(editingWallet ? 'Cập nhật ví thành công!' : 'Thêm ví mới thành công!');
-    } catch (error) {
-      console.error('Lỗi khi thao tác với ví:', error.response?.data || error.message);
-      alert('Có lỗi xảy ra. Vui lòng thử lại!');
-    }
-  };
-
-  const handleDeleteWallet = async (id) => {
-    try {
-      const response = await axios.delete(`http://localhost:8080/api/wallets/${id}`, {
-        headers: {
-          'Authorization': `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJEdXliZmwiLCJpYXQiOjE3MzYxMzg2OTAsImV4cCI6MTczNjIyNTA5MH0.vHpr93tdIYmKg2o_szYvAjLPISAQXQnaf0vTGjFhWV0`
-        }
-      });
-      
-      if (response.status === 200) {
-        // Cập nhật state sau khi xóa thành công
-        setWallets(wallets.filter((w) => w.id !== id));
-        alert('Xóa ví thành công!');
-      }
-    } catch (error) {
-      console.error('Lỗi khi xóa ví:', error.response?.data || error.message);
-      alert('Có lỗi xảy ra khi xóa ví. Vui lòng thử lại!');
-    }
-  };
-
   const handleOpenAddMoneyDialog = (walletId) => {
     setAddMoneyData({
       amount: "",
@@ -179,41 +191,6 @@ const Wallets = () => {
     });
   };
 
-  const handleAddMoney = async () => {
-    try {
-      const response = await axios.post('http://localhost:8080/api/wallets/add-money', {
-        walletId: addMoneyData.walletId,
-        amount: parseFloat(addMoneyData.amount),
-        note: addMoneyData.note
-      }, {
-        headers: {
-          'Authorization': `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJEdXliZmwiLCJpYXQiOjE3MzYxNDIyODgsImV4cCI6MTczNjIyODY4OH0.W9MMjR0r5meLVE_cp5dX-F5lL6S9Ga7ZW_06JEpBs3U`
-        }
-      });
-
-      console.log('Add money response:', response.data);
-      await fetchWallets();
-      handleCloseAddMoneyDialog();
-      alert('Thêm tiền thành công!');
-    } catch (error) {
-      console.error('Error adding money:', error.response?.data || error.message);
-      alert('Có lỗi xảy ra khi thêm tiền. Vui lòng thử lại!');
-    }
-  };
-
-  const fetchWallets = async () => {
-    try {
-      const response = await axios.get('http://localhost:8080/api/wallets/list', {
-        headers: {
-          'Authorization': `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJEdXliZmwiLCJpYXQiOjE3MzYxMzg2OTAsImV4cCI6MTczNjIyNTA5MH0.vHpr93tdIYmKg2o_szYvAjLPISAQXQnaf0vTGjFhWV0`
-        }
-      });
-      setWallets(response.data);
-    } catch (error) {
-      console.error('Error fetching wallets:', error);
-    }
-  };
-
   const formatCurrency = (amount) => {
     if (!amount) return "0 ₫";
     return new Intl.NumberFormat('vi-VN', {
@@ -228,6 +205,16 @@ const Wallets = () => {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      {loading && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+          <CircularProgress />
+        </Box>
+      )}
+      {error && (
+        <Box sx={{ mb: 2 }}>
+          <Alert severity="error">{error}</Alert>
+        </Box>
+      )}
       <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
         <Typography variant="h5" component="h2">
           Quản Lý Ví
