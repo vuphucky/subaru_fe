@@ -86,9 +86,10 @@ const AvatarMenu = ({ userAvatar }) => {
                         border: '2px solid #90caf9'
                     }
                 }}
-                src={userAvatar || '/default-avatar.png'}
+                src={userAvatar}
+                alt={username}
             >
-                {username ? username[0].toUpperCase() : 'U'}
+                {!userAvatar && username ? username[0].toUpperCase() : 'U'}
             </Avatar>
             <Typography
                 className="username"

@@ -9,114 +9,154 @@ import {
     Box,
     IconButton,
     Alert,
+    CircularProgress,
     Dialog,
     DialogTitle,
     DialogContent,
-    DialogActions
+    DialogContentText,
+    DialogActions,
+    Stack
 } from '@mui/material';
-import { PhotoCamera } from '@mui/icons-material';
-import { getCurrentUser, updateProfile } from '../services/userService';
+import { PhotoCamera, Edit, Cancel, Save } from '@mui/icons-material';
+import { updateProfile } from '../services/userService';
+import { useUser } from '../contexts/UserContext';
 
 const Profile = () => {
-    const [user, setUser] = useState({
-        username: '',
-        email: '',
-        fullName: '',
-        avatar: null
-    });
+    const { user, avatar, updateUser, updateAvatar, loading } = useUser();
     const [file, setFile] = useState(null);
     const [message, setMessage] = useState({ type: '', content: '' });
-    const [openPasswordDialog, setOpenPasswordDialog] = useState(false);
-    const [passwordData, setPasswordData] = useState({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
+    const [previewUrl, setPreviewUrl] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+    const [editedData, setEditedData] = useState({
+        email: '',
+        fullName: ''
     });
 
     useEffect(() => {
-        fetchUserData();
-    }, []);
+        setPreviewUrl(avatar);
+        setEditedData({
+            email: user?.email || '',
+            fullName: user?.fullName || ''
+        });
+    }, [avatar, user]);
 
-    const fetchUserData = async () => {
-        try {
-            const userData = await getCurrentUser();
-            setUser(userData);
-        } catch (error) {
-            setMessage({ type: 'error', content: 'Lỗi khi tải thông tin người dùng' });
-        }
+    const handleStartEdit = () => {
+        setIsEditing(true);
+    };
+
+    const handleCancelEdit = () => {
+        setIsEditing(false);
+        setFile(null);
+        setPreviewUrl(avatar);
+        setEditedData({
+            email: user?.email || '',
+            fullName: user?.fullName || ''
+        });
+        setMessage({ type: '', content: '' });
     };
 
     const handleChange = (e) => {
-        setUser({ ...user, [e.target.name]: e.target.value });
-    };
-
-    const handlePasswordChange = (e) => {
-        setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        setEditedData(prev => ({
+            ...prev,
+            [name]: value
+        }));
     };
 
     const handleFileChange = (e) => {
         if (e.target.files[0]) {
-            setFile(e.target.files[0]);
+            const selectedFile = e.target.files[0];
+            setFile(selectedFile);
+            
             const reader = new FileReader();
             reader.onloadend = () => {
-                setUser({ ...user, avatar: reader.result });
+                const previewURL = reader.result;
+                setPreviewUrl(previewURL);
+                updateAvatar(previewURL);
             };
-            reader.readAsDataURL(e.target.files[0]);
+            reader.readAsDataURL(selectedFile);
         }
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleSubmitClick = () => {
+        if (!file && editedData.email === user?.email && editedData.fullName === user?.fullName) {
+            setMessage({ type: 'warning', content: 'Không có thông tin nào được thay đổi' });
+            return;
+        }
+        setConfirmDialogOpen(true);
+    };
+
+    const handleConfirmSubmit = async () => {
+        setConfirmDialogOpen(false);
+        const oldAvatar = avatar;
+        setIsSubmitting(true);
+        
         try {
             const formData = new FormData();
-            formData.append('fullName', user.fullName);
-            formData.append('email', user.email);
+            formData.append('fullName', editedData.fullName);
+            formData.append('email', editedData.email);
             if (file) {
                 formData.append('avatar', file);
             }
 
             const updatedUser = await updateProfile(formData);
-            setUser(updatedUser);
+            updateUser(updatedUser);
             setMessage({ type: 'success', content: 'Cập nhật thông tin thành công' });
+            setFile(null);
+            setIsEditing(false);
+
+            // Đợi 1 giây để hiển thị thông báo thành công, sau đó refresh trang
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
         } catch (error) {
+            console.error('Error updating profile:', error);
             setMessage({ type: 'error', content: 'Lỗi khi cập nhật thông tin: ' + error });
+            if (oldAvatar) {
+                setPreviewUrl(oldAvatar);
+                updateAvatar(oldAvatar);
+            }
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
-    const handlePasswordSubmit = async () => {
-        if (passwordData.newPassword !== passwordData.confirmPassword) {
-            setMessage({ type: 'error', content: 'Mật khẩu mới không khớp' });
-            return;
-        }
-
-        try {
-            await updateProfile({ password: passwordData.newPassword });
-            setMessage({ type: 'success', content: 'Cập nhật mật khẩu thành công' });
-            setOpenPasswordDialog(false);
-            setPasswordData({
-                currentPassword: '',
-                newPassword: '',
-                confirmPassword: ''
-            });
-        } catch (error) {
-            setMessage({ type: 'error', content: 'Lỗi khi cập nhật mật khẩu: ' + error });
-        }
-    };
+    if (loading) {
+        return (
+            <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+                <CircularProgress />
+            </Container>
+        );
+    }
 
     return (
         <Container maxWidth="sm" sx={{ mt: 4 }}>
             <Paper elevation={3} sx={{ p: 4 }}>
-                <Typography variant="h5" gutterBottom align="center">
-                    Thông tin cá nhân
-                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                    <Typography variant="h5">
+                        Thông tin cá nhân
+                    </Typography>
+                    {!isEditing && (
+                        <Button
+                            startIcon={<Edit />}
+                            variant="contained"
+                            onClick={handleStartEdit}
+                        >
+                            Chỉnh sửa
+                        </Button>
+                    )}
+                </Box>
+
                 {message.content && (
                     <Alert severity={message.type} sx={{ mb: 2 }}>
                         {message.content}
                     </Alert>
                 )}
+
                 <Box
                     component="form"
-                    onSubmit={handleSubmit}
                     sx={{
                         display: 'flex',
                         flexDirection: 'column',
@@ -126,106 +166,110 @@ const Profile = () => {
                 >
                     <Box sx={{ position: 'relative' }}>
                         <Avatar
-                            src={user.avatar}
+                            src={previewUrl}
+                            alt={user?.username}
                             sx={{ width: 100, height: 100, mb: 2 }}
-                        />
-                        <IconButton
-                            color="primary"
-                            aria-label="upload picture"
-                            component="label"
-                            sx={{
-                                position: 'absolute',
-                                bottom: 0,
-                                right: 0,
-                                backgroundColor: 'white'
+                            imgProps={{ 
+                                loading: "eager",
+                                onError: (e) => {
+                                    console.error('Avatar load error:', e);
+                                    e.target.src = '/default-avatar.png';
+                                }
                             }}
-                        >
-                            <input
-                                hidden
-                                accept="image/*"
-                                type="file"
-                                onChange={handleFileChange}
-                            />
-                            <PhotoCamera />
-                        </IconButton>
+                        />
+                        {isEditing && (
+                            <>
+                                <input
+                                    accept="image/*"
+                                    type="file"
+                                    id="avatar-upload"
+                                    onChange={handleFileChange}
+                                    style={{ display: 'none' }}
+                                />
+                                <label htmlFor="avatar-upload">
+                                    <IconButton
+                                        color="primary"
+                                        component="span"
+                                        sx={{
+                                            position: 'absolute',
+                                            bottom: 16,
+                                            right: -8,
+                                            backgroundColor: 'white'
+                                        }}
+                                        disabled={isSubmitting}
+                                    >
+                                        <PhotoCamera />
+                                    </IconButton>
+                                </label>
+                            </>
+                        )}
                     </Box>
+
                     <TextField
                         fullWidth
                         label="Tên đăng nhập"
                         name="username"
-                        value={user.username}
+                        value={user?.username || ''}
                         disabled
                     />
                     <TextField
                         fullWidth
                         label="Email"
                         name="email"
-                        value={user.email}
+                        value={isEditing ? editedData.email : user?.email || ''}
                         onChange={handleChange}
+                        disabled={!isEditing || isSubmitting}
                     />
                     <TextField
                         fullWidth
                         label="Họ và tên"
                         name="fullName"
-                        value={user.fullName}
+                        value={isEditing ? editedData.fullName : user?.fullName || ''}
                         onChange={handleChange}
+                        disabled={!isEditing || isSubmitting}
                     />
-                    <Box sx={{ display: 'flex', gap: 2, width: '100%' }}>
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            color="primary"
-                            fullWidth
-                        >
-                            Cập nhật thông tin
-                        </Button>
-                        <Button
-                            variant="outlined"
-                            color="primary"
-                            fullWidth
-                            onClick={() => setOpenPasswordDialog(true)}
-                        >
-                            Đổi mật khẩu
-                        </Button>
-                    </Box>
+
+                    {isEditing && (
+                        <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+                            <Button
+                                variant="outlined"
+                                startIcon={<Cancel />}
+                                onClick={handleCancelEdit}
+                                disabled={isSubmitting}
+                            >
+                                Hủy
+                            </Button>
+                            <Button
+                                variant="contained"
+                                startIcon={<Save />}
+                                onClick={handleSubmitClick}
+                                disabled={isSubmitting}
+                            >
+                                {isSubmitting ? <CircularProgress size={24} /> : 'Lưu thay đổi'}
+                            </Button>
+                        </Stack>
+                    )}
                 </Box>
             </Paper>
 
-            {/* Dialog đổi mật khẩu */}
-            <Dialog open={openPasswordDialog} onClose={() => setOpenPasswordDialog(false)}>
-                <DialogTitle>Đổi mật khẩu</DialogTitle>
+            <Dialog
+                open={confirmDialogOpen}
+                onClose={() => setConfirmDialogOpen(false)}
+            >
+                <DialogTitle>
+                    Xác nhận thay đổi
+                </DialogTitle>
                 <DialogContent>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
-                        <TextField
-                            fullWidth
-                            type="password"
-                            label="Mật khẩu hiện tại"
-                            name="currentPassword"
-                            value={passwordData.currentPassword}
-                            onChange={handlePasswordChange}
-                        />
-                        <TextField
-                            fullWidth
-                            type="password"
-                            label="Mật khẩu mới"
-                            name="newPassword"
-                            value={passwordData.newPassword}
-                            onChange={handlePasswordChange}
-                        />
-                        <TextField
-                            fullWidth
-                            type="password"
-                            label="Xác nhận mật khẩu mới"
-                            name="confirmPassword"
-                            value={passwordData.confirmPassword}
-                            onChange={handlePasswordChange}
-                        />
-                    </Box>
+                    <DialogContentText>
+                        Bạn có chắc chắn muốn cập nhật thông tin cá nhân?
+                    </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setOpenPasswordDialog(false)}>Hủy</Button>
-                    <Button onClick={handlePasswordSubmit} variant="contained">
-                        Cập nhật
+                    <Button onClick={() => setConfirmDialogOpen(false)}>
+                        Hủy
+                    </Button>
+                    <Button onClick={handleConfirmSubmit} variant="contained" autoFocus>
+                        Xác nhận
                     </Button>
                 </DialogActions>
             </Dialog>

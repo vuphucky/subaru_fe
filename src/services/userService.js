@@ -1,33 +1,52 @@
 import axios from 'axios';
-import { getToken } from './authService';
+import authService from './authService';
 
-const API_URL = 'http://localhost:8080/api/users';
+const API_URL = 'http://localhost:8080/api';
+const BASE_URL = 'http://localhost:8080';
+
+const getFullAvatarUrl = (avatarPath) => {
+    if (!avatarPath) return null;
+    if (avatarPath.startsWith('http')) return avatarPath;
+    if (avatarPath.startsWith('data:image')) return avatarPath;
+    return `${BASE_URL}${avatarPath}`;
+};
 
 export const getCurrentUser = async () => {
     try {
-        const token = getToken();
-        const response = await axios.get(`${API_URL}/profile`, {
+        const token = authService.getToken();
+        const response = await axios.get(`${API_URL}/users/profile`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         });
-        return response.data;
+        const userData = response.data;
+        userData.avatar = getFullAvatarUrl(userData.avatar);
+        localStorage.setItem('user', JSON.stringify(userData));
+        return userData;
     } catch (error) {
-        throw error.response?.data || 'Error getting user profile';
+        console.error('Error getting user:', error);
+        throw error.response?.data || 'Không thể lấy thông tin người dùng';
     }
 };
 
-export const updateProfile = async (userData) => {
+export const updateProfile = async (formData) => {
     try {
-        const token = getToken();
-        const response = await axios.put(`${API_URL}/profile`, userData, {
+        const token = authService.getToken();
+        const response = await axios.put(`${API_URL}/users/profile`, formData, {
             headers: {
                 'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
+                'Content-Type': 'multipart/form-data'
             }
         });
-        return response.data;
+        const updatedUser = response.data;
+        updatedUser.avatar = getFullAvatarUrl(updatedUser.avatar);
+        
+        // Cập nhật localStorage
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        
+        return updatedUser;
     } catch (error) {
-        throw error.response?.data || 'Error updating profile';
+        console.error('Error updating profile:', error);
+        throw error.response?.data || 'Không thể cập nhật thông tin';
     }
 };

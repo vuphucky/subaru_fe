@@ -21,6 +21,7 @@ import Register from './components/auth/Register';
 import ForgotPassword from './components/auth/ForgotPassword';
 import Profile from './pages/Profile';
 import ChangePassword from './pages/ChangePassword';
+import { UserProvider } from './contexts/UserContext';
 
 const theme = createTheme({
     palette: {
@@ -49,37 +50,39 @@ function App() {
         <ThemeProvider theme={theme}>
             <CssBaseline />
             <Router>
-                <Routes>
-                    {/* Auth routes without header */}
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={<Register />} />
-                    <Route path="/forgot-password" element={<ForgotPassword />} />
-                    <Route path="/" element={<Navigate to="/login" />} />
+                <UserProvider>
+                    <Routes>
+                        {/* Auth routes without header */}
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/register" element={<Register />} />
+                        <Route path="/forgot-password" element={<ForgotPassword />} />
+                        <Route path="/" element={<Navigate to="/login" />} />
 
-                    {/* Main routes with header */}
-                    <Route path="/dashboard" element={<MainLayout><Dashboard /></MainLayout>} />
-                    <Route path="/transactions" element={<MainLayout><Transactions /></MainLayout>} />
-                    <Route path="/wallets" element={<MainLayout><Wallets /></MainLayout>} />
-                    <Route path="/about" element={<MainLayout><About /></MainLayout>} />
-                    <Route path="/features" element={<MainLayout><Features /></MainLayout>} />
-                    <Route path="/support" element={<MainLayout><Support /></MainLayout>} />
-                    <Route path="/privacy" element={<MainLayout><Privacy /></MainLayout>} />
-                    <Route path="/terms" element={<MainLayout><Terms /></MainLayout>} />
-                    <Route path="/profile" element={<MainLayout><Profile /></MainLayout>} />
-                    <Route path="/change-password" element={<MainLayout><ChangePassword /></MainLayout>} />
-                </Routes>
-                <ToastContainer
-                    position="top-right"
-                    autoClose={3000}
-                    hideProgressBar={false}
-                    newestOnTop
-                    closeOnClick
-                    rtl={false}
-                    pauseOnFocusLoss
-                    draggable
-                    pauseOnHover
-                    theme="colored"
-                />
+                        {/* Main routes with header */}
+                        <Route path="/dashboard" element={<MainLayout><Dashboard /></MainLayout>} />
+                        <Route path="/transactions" element={<MainLayout><Transactions /></MainLayout>} />
+                        <Route path="/wallets" element={<MainLayout><Wallets /></MainLayout>} />
+                        <Route path="/about" element={<MainLayout><About /></MainLayout>} />
+                        <Route path="/features" element={<MainLayout><Features /></MainLayout>} />
+                        <Route path="/support" element={<MainLayout><Support /></MainLayout>} />
+                        <Route path="/privacy" element={<MainLayout><Privacy /></MainLayout>} />
+                        <Route path="/terms" element={<MainLayout><Terms /></MainLayout>} />
+                        <Route path="/profile" element={<MainLayout><Profile /></MainLayout>} />
+                        <Route path="/change-password" element={<MainLayout><ChangePassword /></MainLayout>} />
+                    </Routes>
+                    <ToastContainer
+                        position="top-right"
+                        autoClose={3000}
+                        hideProgressBar={false}
+                        newestOnTop
+                        closeOnClick
+                        rtl={false}
+                        pauseOnFocusLoss
+                        draggable
+                        pauseOnHover
+                        theme="colored"
+                    />
+                </UserProvider>
             </Router>
         </ThemeProvider>
     );
