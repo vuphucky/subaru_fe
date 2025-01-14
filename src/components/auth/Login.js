@@ -69,8 +69,14 @@ const Login = () => {
             await validationSchema.validate(formData, { abortEarly: false });
 
             const response = await axios.post('http://localhost:8080/api/auth/login', formData);
-            localStorage.setItem('token', response.data.token);
-            localStorage.setItem('user', JSON.stringify(response.data));
+            const { token, ...userData } = response.data;
+            
+            // Import authService để xử lý user data
+            const authService = (await import('../../services/authService')).default;
+            const processedUser = authService.processUserData(userData);
+            
+            localStorage.setItem('token', token);
+            localStorage.setItem('user', JSON.stringify(processedUser));
 
             toast.success('Đăng nhập thành công!');
             navigate('/dashboard');
