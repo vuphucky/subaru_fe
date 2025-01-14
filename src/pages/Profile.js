@@ -8,10 +8,15 @@ import {
     Avatar,
     Box,
     IconButton,
-    Alert
+    Alert,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions
 } from '@mui/material';
 import { PhotoCamera } from '@mui/icons-material';
-import axios from 'axios';
+import { getCurrentUser, updateProfile } from '../services/userService';
+
 const Profile = () => {
     const [user, setUser] = useState({
         username: '',
@@ -21,28 +26,37 @@ const Profile = () => {
     });
     const [file, setFile] = useState(null);
     const [message, setMessage] = useState({ type: '', content: '' });
+    const [openPasswordDialog, setOpenPasswordDialog] = useState(false);
+    const [passwordData, setPasswordData] = useState({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+    });
+
     useEffect(() => {
-        // Lấy thông tin user từ API
-        const fetchUserData = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                const response = await axios.get('http://localhost:8080/api/users/profile', {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                setUser(response.data);
-            } catch (error) {
-                setMessage({ type: 'error', content: 'Lỗi khi tải thông tin người dùng' });
-            }
-        };
         fetchUserData();
     }, []);
+
+    const fetchUserData = async () => {
+        try {
+            const userData = await getCurrentUser();
+            setUser(userData);
+        } catch (error) {
+            setMessage({ type: 'error', content: 'Lỗi khi tải thông tin người dùng' });
+        }
+    };
+
     const handleChange = (e) => {
         setUser({ ...user, [e.target.name]: e.target.value });
     };
+
+    const handlePasswordChange = (e) => {
+        setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
+    };
+
     const handleFileChange = (e) => {
         if (e.target.files[0]) {
             setFile(e.target.files[0]);
-            // Hiển thị preview
             const reader = new FileReader();
             reader.onloadend = () => {
                 setUser({ ...user, avatar: reader.result });
@@ -50,29 +64,45 @@ const Profile = () => {
             reader.readAsDataURL(e.target.files[0]);
         }
     };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const token = localStorage.getItem('token');
             const formData = new FormData();
             formData.append('fullName', user.fullName);
             formData.append('email', user.email);
             if (file) {
                 formData.append('avatar', file);
             }
-            await axios.put('http://localhost:8080/api/users/profile', formData, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
+
+            const updatedUser = await updateProfile(formData);
+            setUser(updatedUser);
             setMessage({ type: 'success', content: 'Cập nhật thông tin thành công' });
-            // Cập nhật thông tin user trong localStorage
-            localStorage.setItem('user', JSON.stringify(user));
         } catch (error) {
-            setMessage({ type: 'error', content: 'Lỗi khi cập nhật thông tin' });
+            setMessage({ type: 'error', content: 'Lỗi khi cập nhật thông tin: ' + error });
         }
     };
+
+    const handlePasswordSubmit = async () => {
+        if (passwordData.newPassword !== passwordData.confirmPassword) {
+            setMessage({ type: 'error', content: 'Mật khẩu mới không khớp' });
+            return;
+        }
+
+        try {
+            await updateProfile({ password: passwordData.newPassword });
+            setMessage({ type: 'success', content: 'Cập nhật mật khẩu thành công' });
+            setOpenPasswordDialog(false);
+            setPasswordData({
+                currentPassword: '',
+                newPassword: '',
+                confirmPassword: ''
+            });
+        } catch (error) {
+            setMessage({ type: 'error', content: 'Lỗi khi cập nhật mật khẩu: ' + error });
+        }
+    };
+
     return (
         <Container maxWidth="sm" sx={{ mt: 4 }}>
             <Paper elevation={3} sx={{ p: 4 }}>
@@ -140,17 +170,67 @@ const Profile = () => {
                         value={user.fullName}
                         onChange={handleChange}
                     />
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                        sx={{ mt: 2 }}
-                    >
-                        Cập nhật thông tin
-                    </Button>
+                    <Box sx={{ display: 'flex', gap: 2, width: '100%' }}>
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            color="primary"
+                            fullWidth
+                        >
+                            Cập nhật thông tin
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            color="primary"
+                            fullWidth
+                            onClick={() => setOpenPasswordDialog(true)}
+                        >
+                            Đổi mật khẩu
+                        </Button>
+                    </Box>
                 </Box>
             </Paper>
+
+            {/* Dialog đổi mật khẩu */}
+            <Dialog open={openPasswordDialog} onClose={() => setOpenPasswordDialog(false)}>
+                <DialogTitle>Đổi mật khẩu</DialogTitle>
+                <DialogContent>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
+                        <TextField
+                            fullWidth
+                            type="password"
+                            label="Mật khẩu hiện tại"
+                            name="currentPassword"
+                            value={passwordData.currentPassword}
+                            onChange={handlePasswordChange}
+                        />
+                        <TextField
+                            fullWidth
+                            type="password"
+                            label="Mật khẩu mới"
+                            name="newPassword"
+                            value={passwordData.newPassword}
+                            onChange={handlePasswordChange}
+                        />
+                        <TextField
+                            fullWidth
+                            type="password"
+                            label="Xác nhận mật khẩu mới"
+                            name="confirmPassword"
+                            value={passwordData.confirmPassword}
+                            onChange={handlePasswordChange}
+                        />
+                    </Box>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenPasswordDialog(false)}>Hủy</Button>
+                    <Button onClick={handlePasswordSubmit} variant="contained">
+                        Cập nhật
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Container>
     );
 };
+
 export default Profile;
